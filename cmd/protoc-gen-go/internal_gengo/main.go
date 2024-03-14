@@ -410,9 +410,8 @@ func genMessageField(g *protogen.GeneratedFile, f *fileInfo, m *messageInfo, fie
 	tags := structTags{
 		{"protobuf", fieldProtobufTagValue(field)},
 		{"json", fieldJSONTagValue(field)},
-	}
-	if !field.Desc.IsList() {
-		tags = append(tags, [2]string{"gorm", fieldGORMTagValue(field)})
+		{"gorm", fieldGORMTagValue(field)},
+		{"redis", fieldRedisTagValue(field)},
 	}
 	if field.Desc.IsMap() {
 		key := field.Message.Fields[0]
@@ -736,6 +735,10 @@ func fieldJSONTagValue(field *protogen.Field) string {
 
 func fieldGORMTagValue(field *protogen.Field) string {
     return "column:" + string(field.Desc.Name())
+}
+
+func fieldRedisTagValue(field *protogen.Field) string {
+    return string(field.Desc.Name())
 }
 
 func genExtensions(g *protogen.GeneratedFile, f *fileInfo) {
