@@ -738,7 +738,7 @@ func fieldGORMTagValue(field *protogen.Field) string {
 }
 
 func fieldRedisTagValue(field *protogen.Field) string {
-    return string(field.Desc.Name()) + ",omitempty"
+    return string(field.Desc.Name())
 }
 
 func genExtensions(g *protogen.GeneratedFile, f *fileInfo) {
