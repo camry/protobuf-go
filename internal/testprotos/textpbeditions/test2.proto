@@ -153,8 +153,11 @@ message Nests {
       fixed32 opt_fixed32 = 1;
     }
     OptNestedGroup optnestedgroup = 3 [features.message_encoding = DELIMITED];
+    OptNestedGroup nested_delimited_field = 4
+        [features.message_encoding = DELIMITED];
   }
   OptGroup optgroup = 2 [features.message_encoding = DELIMITED];
+  OptGroup delimited_field = 3 [features.message_encoding = DELIMITED];
 
   repeated Nested rpt_nested = 4;
   message RptGroup {
@@ -193,7 +196,7 @@ message NestedWithRequired {
 }
 
 message IndirectRequired {
-  NestedWithRequired opt_nested = 1 [features.field_presence = LEGACY_REQUIRED];
+  NestedWithRequired opt_nested = 1;
   repeated NestedWithRequired rpt_nested = 2;
   map<string, NestedWithRequired> str_to_nested = 3;
 

@@ -52,7 +52,7 @@ var (
 	`)
 	protoEdition2023Message = mustParseFile(`
 		syntax:    "editions"
-		edition:   2023
+		edition:   EDITION_2023
 		name:      "proto_editions_2023_message.proto"
 		package:   "test.editions2023"
 		options: {
@@ -70,7 +70,7 @@ var (
 	`)
 	protoEdition2024Message = mustParseFile(`
 		syntax:    "editions"
-		edition:   2024
+		edition:   EDITION_2024
 		name:      "proto_editions_2024_message.proto"
 		package:   "test.editions2024"
 		message_type: [{
@@ -173,24 +173,6 @@ func TestNewFile(t *testing.T) {
 		`),
 		inOpts:  FileOptions{AllowUnresolvable: true},
 		wantErr: `already imported "dep.proto"`,
-	}, {
-		label: "invalid weak import",
-		inDesc: mustParseFile(`
-			name:            "test.proto"
-			dependency:      "dep.proto"
-			weak_dependency: [-23]
-		`),
-		inOpts:  FileOptions{AllowUnresolvable: true},
-		wantErr: `invalid or duplicate weak import index: -23`,
-	}, {
-		label: "normal weak and public import",
-		inDesc: mustParseFile(`
-			name:              "test.proto"
-			dependency:        "dep.proto"
-			weak_dependency:   [0]
-			public_dependency: [0]
-		`),
-		inOpts: FileOptions{AllowUnresolvable: true},
 	}, {
 		label: "import public indirect dependency duplicate",
 		inDeps: []*descriptorpb.FileDescriptorProto{
@@ -421,6 +403,44 @@ func TestNewFile(t *testing.T) {
 			}]
 		`),
 	}, {
+		label: "basic editions tests",
+		inDesc: mustParseFile(`
+			syntax: "editions"
+			edition: EDITION_2023
+			name: "test.proto"
+			package: "fizz"
+		`),
+		wantDesc: mustParseFile(`
+			syntax: "editions"
+			edition: EDITION_2023
+			name: "test.proto"
+			package: "fizz"
+		`),
+	}, {
+		label: "proto3 message fields conflict",
+		inDesc: mustParseFile(`
+			syntax:  "proto3"
+			name:    "test.proto"
+			message_type: [{name:"M" nested_type:[{
+				name: "M"
+				field: [
+					{name:"_b_a_z_" number:1 label:LABEL_OPTIONAL type:TYPE_STRING},
+					{name:"baz" number:2 label:LABEL_OPTIONAL type:TYPE_STRING}
+				]
+			}]}]
+		`),
+		wantDesc: mustParseFile(`
+			syntax:  "proto3"
+			name:    "test.proto"
+			message_type: [{name:"M" nested_type:[{
+				name: "M"
+				field: [
+					{name:"_b_a_z_" number:1 label:LABEL_OPTIONAL type:TYPE_STRING},
+					{name:"baz" number:2 label:LABEL_OPTIONAL type:TYPE_STRING}
+				]
+			}]}]
+		`),
+	}, {
 		label: "namespace conflict on enum value",
 		inDesc: mustParseFile(`
 			name:    "test.proto"
@@ -592,7 +612,7 @@ func TestNewFile(t *testing.T) {
 				value: [{name:"baz" number:500}]
 			}]}]
 		`),
-		wantErr: `enum "M.baz" using proto3 semantics must have zero number for the first value`,
+		wantErr: `enum "M.baz" using open semantics must have zero number for the first value`,
 	}, {
 		label: "valid proto3 enum",
 		inDesc: mustParseFile(`
@@ -613,7 +633,7 @@ func TestNewFile(t *testing.T) {
 				value: [{name:"e_Foo" number:0}, {name:"fOo" number:1}]
 			}]}]
 		`),
-		wantErr: `enum "M.E" using proto3 semantics has conflict: "fOo" with "e_Foo"`,
+		wantErr: `enum "M.E" using open semantics has conflict: "fOo" with "e_Foo"`,
 	}, {
 		label: "proto2 enum has name prefix check",
 		inDesc: mustParseFile(`
@@ -804,20 +824,6 @@ func TestNewFile(t *testing.T) {
 		`),
 		wantErr: `message "M.M" using proto3 semantics cannot have extension ranges`,
 	}, {
-		label: "proto3 message fields conflict",
-		inDesc: mustParseFile(`
-			syntax:  "proto3"
-			name:    "test.proto"
-			message_type: [{name:"M" nested_type:[{
-				name: "M"
-				field: [
-					{name:"_b_a_z_" number:1 label:LABEL_OPTIONAL type:TYPE_STRING},
-					{name:"baz" number:2 label:LABEL_OPTIONAL type:TYPE_STRING}
-				]
-			}]}]
-		`),
-		wantErr: `message "M.M" using proto3 semantics has conflict: "baz" with "_b_a_z_"`,
-	}, {
 		label: "proto3 message fields",
 		inDesc: mustParseFile(`
 			syntax:  "proto3"
@@ -842,7 +848,8 @@ func TestNewFile(t *testing.T) {
 	}, {
 		label: "proto editions implicit presence field with defaults",
 		inDesc: mustParseFile(`
-			syntax:  "proto3"
+			syntax:    "editions"
+			edition:   EDITION_2023
 			name:    "test.proto"
 			message_type: [{name:"M" nested_type:[{
 				name:       "M"
