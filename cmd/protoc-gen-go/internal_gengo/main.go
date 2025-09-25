@@ -490,6 +490,7 @@ func genMessageField(g *protogen.GeneratedFile, f *fileInfo, m *messageInfo, fie
 		{"json", fieldJSONTagValue(field)},
 		{"gorm", fieldGORMTagValue(field)},
 		{"redis", fieldRedisTagValue(field)},
+		{"bson", fieldBsonTagValue(field)},
 	}
 	if field.Desc.IsMap() {
 		key := field.Message.Fields[0]
@@ -767,6 +768,10 @@ func fieldGORMTagValue(field *protogen.Field) string {
 
 func fieldRedisTagValue(field *protogen.Field) string {
     return string(field.Desc.Name())
+}
+
+func fieldBsonTagValue(field *protogen.Field) string {
+    return string(field.Desc.Name()) + ",omitempty"
 }
 
 func genExtensions(g *protogen.GeneratedFile, f *fileInfo) {
