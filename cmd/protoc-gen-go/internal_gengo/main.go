@@ -767,6 +767,11 @@ func fieldRedisTagValue(field *protogen.Field) string {
 }
 
 func fieldGORMTagValue(field *protogen.Field) string {
+	if fieldOptions, ok := field.Desc.Options().(*descriptorpb.FieldOptions); ok {
+		if fieldOptions.GetIsJson() {
+			return "column:" + string(field.Desc.Name()) + ";serializer:json"
+		}
+	}
 	return "column:" + string(field.Desc.Name())
 }
 
