@@ -411,7 +411,7 @@ func generateLocalProtos() {
 					opts += fmt.Sprintf(",apilevelM%v=%v", relPath, "API_OPEN")
 				}
 			}
-			protoc("-I"+filepath.Join(repoRoot, "src"), "-I"+filepath.Join(protoRoot, "src"), "-I"+repoRoot, "--go_out="+opts+":"+tmpDir, filepath.Join(repoRoot, relPath))
+			protoc("-I"+filepath.Join(repoRoot, "src"), "-I"+filepath.Join(protoRoot, "src"), "-I"+repoRoot, "--go_opt="+opts, "--go_out="+tmpDir, filepath.Join(repoRoot, relPath))
 			return nil
 		})
 
@@ -470,6 +470,7 @@ func generateRemoteProtos() {
 		{"src", "editions/golden/test_messages_proto2_editions.proto", "google.golang.org/protobuf/internal/testprotos/conformance/editionsmigration;editions"},
 		{"src", "editions/golden/test_messages_proto3_editions.proto", "google.golang.org/protobuf/internal/testprotos/conformance/editionsmigration;editions"},
 		{"", "conformance/test_protos/test_messages_edition2023.proto", "google.golang.org/protobuf/internal/testprotos/conformance/editions;editions"},
+		{"", "conformance/test_protos/test_messages_edition_unstable.proto", "google.golang.org/protobuf/internal/testprotos/conformance/editionunstable;editionunstable"},
 
 		// Benchmark protos.
 		// TODO: The protobuf repo no longer includes benchmarks.
