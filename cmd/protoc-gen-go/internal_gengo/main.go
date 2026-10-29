@@ -488,6 +488,9 @@ func genMessageField(g *protogen.GeneratedFile, f *fileInfo, m *messageInfo, fie
 	tags := structTags{
 		{"protobuf", fieldProtobufTagValue(field)},
 		{"json", fieldJSONTagValue(field)},
+		{"redis", fieldRedisTagValue(field)},
+		{"bson", fieldBSONTagValue(field)},
+		{"gorm", fieldGORMTagValue(field)},
 	}
 	if field.Desc.IsMap() {
 		key := field.Message.Fields[0]
@@ -757,6 +760,23 @@ func fieldDefaultValue(g *protogen.GeneratedFile, f *fileInfo, m *messageInfo, f
 
 func fieldJSONTagValue(field *protogen.Field) string {
 	return string(field.Desc.Name()) + ",omitempty"
+}
+
+func fieldRedisTagValue(field *protogen.Field) string {
+	return string(field.Desc.Name())
+}
+
+func fieldGORMTagValue(field *protogen.Field) string {
+	if fieldOptions, ok := field.Desc.Options().(*descriptorpb.FieldOptions); ok {
+		if fieldOptions.GetIsJson() {
+			return "column:" + string(field.Desc.Name()) + ";serializer:json"
+		}
+	}
+	return "column:" + string(field.Desc.Name())
+}
+
+func fieldBSONTagValue(field *protogen.Field) string {
+	return string(field.Desc.Name())
 }
 
 func genExtensions(g *protogen.GeneratedFile, f *fileInfo) {
